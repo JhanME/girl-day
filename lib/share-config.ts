@@ -1,3 +1,4 @@
+import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from "lz-string"
 import { siteConfig } from "./site-config"
 import { resolveMusicPreset } from "./music-presets"
 import type { RuntimeConfig } from "./config-context"
@@ -18,7 +19,7 @@ export function encodeConfig(config: RuntimeConfig, cursorPreset: string, musicP
     p: cursorPreset,
     m: musicPreset,
   }
-  return btoa(encodeURIComponent(JSON.stringify(payload)))
+  return compressToEncodedURIComponent(JSON.stringify(payload))
 }
 
 export function decodeConfigFromUrl(): { config: RuntimeConfig; cursorPreset: string; musicPreset: string } | null {
@@ -29,7 +30,15 @@ export function decodeConfigFromUrl(): { config: RuntimeConfig; cursorPreset: st
   if (!encoded) return null
 
   try {
-    const payload: SharePayload = JSON.parse(decodeURIComponent(atob(encoded)))
+    // Try lz-string first
+    let json = decompressFromEncodedURIComponent(encoded)
+
+    // Fallback: old base64 format for backwards compatibility
+    if (!json) {
+      json = decodeURIComponent(atob(encoded))
+    }
+
+    const payload: SharePayload = JSON.parse(json)
 
     const musicPreset = payload.m || "katt_chata"
     const musicFile = resolveMusicPreset(musicPreset) ?? siteConfig.musicFile

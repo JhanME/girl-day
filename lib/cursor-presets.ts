@@ -3,19 +3,22 @@ export interface CursorPreset {
   label: string
   svg: string
   image?: string
+  locked?: boolean
 }
 
 export const CURSOR_PRESETS: CursorPreset[] = [
   {
     id: "default",
-    label: "Original",
+    label: "Cara 1",
     svg: "",
+    locked: true,
   },
   {
     id: "cabeza3",
     label: "Cara 2",
     svg: "",
     image: "/cabeza3.png",
+    locked: true,
   },
   {
     id: "heart",
@@ -48,6 +51,8 @@ export const CURSOR_PRESETS: CursorPreset[] = [
     svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32"><rect x="14.5" y="18" width="3" height="12" rx="1.5" fill="#22c55e"/><ellipse cx="11" cy="22" rx="4" ry="3" fill="#16a34a" transform="rotate(-20,11,22)"/><ellipse cx="21" cy="24" rx="4" ry="3" fill="#16a34a" transform="rotate(20,21,24)"/><circle cx="16" cy="12" r="9" fill="#f43f5e"/><circle cx="16" cy="12" r="6.5" fill="#fb7185"/><circle cx="16" cy="12" r="4" fill="#fda4af"/><circle cx="16" cy="12" r="2" fill="#fecdd3"/></svg>`,
   },
 ]
+
+export const CURSOR_UNLOCK_CODE = "1304"
 
 export function svgToDataUrl(svg: string): string {
   return "data:image/svg+xml," + encodeURIComponent(svg)
