@@ -1,5 +1,11 @@
 "use client"
 
+import { useState, useEffect } from "react"
+import { ConfigPanel } from "@/components/config-panel"
+import { ConfigProvider } from "@/lib/config-context"
+import type { RuntimeConfig } from "@/lib/config-context"
+import { decodeConfigFromUrl } from "@/lib/share-config"
+import { resolvePresetCursor } from "@/lib/cursor-presets"
 import { Sunflower } from "@/components/sunflower"
 import { CometField } from "@/components/shooting-star"
 import { FloatingLeaf } from "@/components/floating-leaf"
@@ -10,7 +16,7 @@ import { FaceCursorTrail } from "@/components/face-cursor"
 import { Fireflies } from "@/components/fireflies"
 import { MusicPlayer } from "@/components/music-player"
 
-export default function Home() {
+function Scene() {
   return (
     <main className="relative min-h-screen w-full overflow-hidden bg-gradient-to-b from-[#060e1a] via-[#0b1a30] to-[#091525]">
       {/* Music */}
@@ -79,5 +85,45 @@ export default function Home() {
         </svg>
       </div>
     </main>
+  )
+}
+
+/** Apply cursor preset overrides to a config */
+function applyPreset(config: RuntimeConfig, presetId: string): RuntimeConfig {
+  const resolved = resolvePresetCursor(presetId)
+  if (!resolved) return config
+  return { ...config, cursorImage: resolved.cursorImage, cursorTrailImage: resolved.cursorTrailImage }
+}
+
+export default function Home() {
+  const [config, setConfig] = useState<RuntimeConfig | null>(null)
+  const [checked, setChecked] = useState(false)
+
+  // Check URL for shared config on mount
+  useEffect(() => {
+    const shared = decodeConfigFromUrl()
+    if (shared) {
+      setConfig(applyPreset(shared.config, shared.cursorPreset))
+    }
+    setChecked(true)
+  }, [])
+
+  // Don't render anything until we've checked the URL
+  if (!checked) return null
+
+  if (!config) {
+    return (
+      <ConfigPanel
+        onStart={(cfg, cursorPreset) => setConfig(applyPreset(cfg, cursorPreset))}
+      />
+    )
+  }
+
+  return (
+    <ConfigProvider config={config}>
+      <div style={{ cursor: `url('${config.cursorImage}') 16 16, auto` }}>
+        <Scene />
+      </div>
+    </ConfigProvider>
   )
 }

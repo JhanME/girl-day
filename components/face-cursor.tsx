@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { useConfig } from "@/lib/config-context"
 
 const IMG_SIZE = 32
 const TRAIL_LENGTH = 4
@@ -16,6 +17,7 @@ interface Point {
 }
 
 export function FaceCursorTrail() {
+  const config = useConfig()
   const [trail, setTrail] = useState<Point[]>([])
   const [stamps, setStamps] = useState<Point[]>([])
   const counter = useRef(0)
@@ -97,7 +99,7 @@ export function FaceCursorTrail() {
       {stamps.map((point) => (
         <img
           key={`stamp-${point.id}`}
-          src="/cabeza2-cursor.png"
+          src={config.cursorTrailImage}
           alt=""
           draggable={false}
           style={{
@@ -120,7 +122,7 @@ export function FaceCursorTrail() {
         return (
           <img
             key={point.id}
-            src="/cabeza2-cursor.png"
+            src={config.cursorTrailImage}
             alt=""
             draggable={false}
             style={{

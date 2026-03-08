@@ -121,7 +121,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    cursor: url('/cabeza2-cursor.png') 16 16, auto;
+
   }
   [data-no-face-cursor],
   [data-no-face-cursor] * {
@@ -396,6 +396,27 @@
     top: -100vh;
     opacity: 0;
   }
+}
+
+/* Volume slider thumb */
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(253, 224, 71, 0.9);
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(253, 224, 71, 0.5);
+}
+.volume-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(253, 224, 71, 0.9);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 6px rgba(253, 224, 71, 0.5);
 }
 
 /* Envelope animations */

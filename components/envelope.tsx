@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback, useRef } from "react"
+import { useConfig } from "@/lib/config-context"
 
 const ESCAPE_CLICKS = 4
 const W = 200
@@ -21,14 +22,18 @@ type Stage = "closed" | "escaping" | "returning" | "opening" | "open"
 function randomEscapePos() {
   const vw = window.innerWidth
   const vh = window.innerHeight
-  const margin = 120
+  // Keep within the upper 60% of the screen to avoid flowers at the bottom
+  const marginX = Math.min(120, vw * 0.15)
+  const marginTop = Math.min(100, vh * 0.1)
+  const maxBottom = vh * 0.55 // Never go past 55% of viewport height
   return {
-    x: margin + Math.random() * (vw - margin * 2) - vw / 2,
-    y: margin + Math.random() * (vh - margin * 2) - vh / 2,
+    x: marginX + Math.random() * (vw - marginX * 2) - vw / 2,
+    y: marginTop + Math.random() * (maxBottom - marginTop) - vh / 2,
   }
 }
 
 export function Envelope() {
+  const config = useConfig()
   const [clicks, setClicks] = useState(0)
   const [stage, setStage] = useState<Stage>("closed")
   const [offset, setOffset] = useState({ x: 0, y: 0 })
@@ -143,12 +148,15 @@ export function Envelope() {
             }}
           >
             <p style={{ fontSize: 11, color: "#b8860b", fontFamily: "serif", marginBottom: 5 }}>
-              8 de Marzo
+              {config.dedication.header}
             </p>
             <p style={{ fontSize: 10, color: "#555", fontFamily: "serif", lineHeight: 1.5 }}>
-              Feliz dia bro,
-              <br />
-              exitos y buenas vibras!
+              {config.dedication.body.map((line, i) => (
+                <span key={i}>
+                  {i > 0 && <br />}
+                  {line}
+                </span>
+              ))}
             </p>
             <p style={{ fontSize: 12, marginTop: 5, color: "#ffffff" }}>
               &hearts;
@@ -261,7 +269,7 @@ export function Envelope() {
             marginTop: 16,
           }}
         >
-          Feliz dia de la mujer!
+          {config.dedication.closing}
         </p>
       )}
     </div>
