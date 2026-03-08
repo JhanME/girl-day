@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import type { RuntimeConfig } from "@/lib/config-context"
 import { siteConfig } from "@/lib/site-config"
 import { CURSOR_PRESETS, CURSOR_UNLOCK_CODE, presetPreviewSrc } from "@/lib/cursor-presets"
-import { MUSIC_PRESETS } from "@/lib/music-presets"
+import { fetchMusicPresets } from "@/lib/music-presets"
+import type { MusicPreset } from "@/lib/music-presets"
 import { buildShareUrl } from "@/lib/share-config"
 
 const CURSOR_SIZE = 32
@@ -37,10 +38,11 @@ interface ConfigPanelProps {
 }
 
 export function ConfigPanel({ onStart }: ConfigPanelProps) {
+  const [musicPresets, setMusicPresets] = useState<MusicPreset[]>([])
   const [header, setHeader] = useState<string>(siteConfig.dedication.header)
   const [bodyText, setBodyText] = useState<string>(siteConfig.dedication.body.join("\n"))
   const [closing, setClosing] = useState<string>(siteConfig.dedication.closing)
-  const [selectedMusic, setSelectedMusic] = useState<string>(MUSIC_PRESETS[0].id)
+  const [selectedMusic, setSelectedMusic] = useState<string>("")
   const [musicPreview, setMusicPreview] = useState<string | null>(null)
   const [cursorResized, setCursorResized] = useState<string | null>(null)
   const [cursorOriginal, setCursorOriginal] = useState<string | null>(null)
@@ -51,6 +53,13 @@ export function ConfigPanel({ onStart }: ConfigPanelProps) {
   const [unlockTarget, setUnlockTarget] = useState<string | null>(null)
   const [unlockCode, setUnlockCode] = useState("")
   const [unlockError, setUnlockError] = useState(false)
+
+  useEffect(() => {
+    fetchMusicPresets().then((presets) => {
+      setMusicPresets(presets)
+      if (presets.length > 0) setSelectedMusic(presets[0].id)
+    })
+  }, [])
 
   const musicInputRef = useRef<HTMLInputElement>(null)
   const cursorInputRef = useRef<HTMLInputElement>(null)
@@ -86,7 +95,7 @@ export function ConfigPanel({ onStart }: ConfigPanelProps) {
     setSelectedMusic(id)
     setMusicFileName("")
     setMusicPreview(null)
-    const preset = MUSIC_PRESETS.find((p) => p.id === id)
+    const preset = musicPresets.find((p) => p.id === id)
     if (preset) playPreview(preset.file)
   }
 
@@ -149,7 +158,7 @@ export function ConfigPanel({ onStart }: ConfigPanelProps) {
     if (selectedMusic === "custom" && musicPreview) {
       musicSrc = musicPreview
     } else {
-      const mp = MUSIC_PRESETS.find((p) => p.id === selectedMusic)
+      const mp = musicPresets.find((p) => p.id === selectedMusic)
       if (mp) musicSrc = mp.file
     }
 
@@ -203,7 +212,7 @@ export function ConfigPanel({ onStart }: ConfigPanelProps) {
             Musica de fondo
           </label>
           <div className="flex flex-wrap gap-2 mb-3">
-            {MUSIC_PRESETS.map((preset) => (
+            {musicPresets.map((preset) => (
               <button
                 key={preset.id}
                 onClick={() => handleMusicPresetSelect(preset.id)}

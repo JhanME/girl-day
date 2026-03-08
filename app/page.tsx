@@ -5,6 +5,7 @@ import { ConfigPanel } from "@/components/config-panel"
 import { ConfigProvider } from "@/lib/config-context"
 import type { RuntimeConfig } from "@/lib/config-context"
 import { decodeConfigFromUrl } from "@/lib/share-config"
+import { fetchMusicPresets } from "@/lib/music-presets"
 import { resolvePresetCursor } from "@/lib/cursor-presets"
 import { Sunflower } from "@/components/sunflower"
 import { CometField } from "@/components/shooting-star"
@@ -117,15 +118,17 @@ export default function Home() {
 
   // Check URL for shared config on mount
   useEffect(() => {
-    const shared = decodeConfigFromUrl()
-    if (shared) {
-      applyPreset(shared.config, shared.cursorPreset).then((cfg) => {
-        setConfig(cfg)
+    fetchMusicPresets().then((presets) => {
+      const shared = decodeConfigFromUrl(presets)
+      if (shared) {
+        applyPreset(shared.config, shared.cursorPreset).then((cfg) => {
+          setConfig(cfg)
+          setChecked(true)
+        })
+      } else {
         setChecked(true)
-      })
-    } else {
-      setChecked(true)
-    }
+      }
+    })
   }, [])
 
   // Don't render anything until we've checked the URL

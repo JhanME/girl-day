@@ -1,6 +1,6 @@
 import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from "lz-string"
 import { siteConfig } from "./site-config"
-import { resolveMusicPreset } from "./music-presets"
+import type { MusicPreset } from "./music-presets"
 import type { RuntimeConfig } from "./config-context"
 
 interface SharePayload {
@@ -22,7 +22,7 @@ export function encodeConfig(config: RuntimeConfig, cursorPreset: string, musicP
   return compressToEncodedURIComponent(JSON.stringify(payload))
 }
 
-export function decodeConfigFromUrl(): { config: RuntimeConfig; cursorPreset: string; musicPreset: string } | null {
+export function decodeConfigFromUrl(musicPresets: MusicPreset[] = []): { config: RuntimeConfig; cursorPreset: string; musicPreset: string } | null {
   if (typeof window === "undefined") return null
 
   const params = new URLSearchParams(window.location.search)
@@ -41,7 +41,8 @@ export function decodeConfigFromUrl(): { config: RuntimeConfig; cursorPreset: st
     const payload: SharePayload = JSON.parse(json)
 
     const musicPreset = payload.m || "katt_chata"
-    const musicFile = resolveMusicPreset(musicPreset) ?? siteConfig.musicFile
+    const found = musicPresets.find((p) => p.id === musicPreset)
+    const musicFile = found?.file ?? siteConfig.musicFile
 
     return {
       cursorPreset: payload.p || "default",

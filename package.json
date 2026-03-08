@@ -1,6 +1,8 @@
 {
-  "name": "my-project",
+  "name": "feliz-dia-de-la-mujer",
   "version": "0.1.0",
+  "description": "Interactive Women's Day greeting card",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "next dev",
