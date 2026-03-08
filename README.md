@@ -2,12 +2,6 @@
 
 Tarjeta interactiva del Día de la Mujer con animaciones, música y dedicatorias personalizables.
 
-[Demo en vivo](https://tu-url.vercel.app)
-
-## Capturas
-
-<!-- Agregar screenshot o GIF -->
-
 ## Características
 
 - Animación multi-etapa: cometas, estrellas, hojas flotantes y girasoles
