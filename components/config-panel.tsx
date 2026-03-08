@@ -3,7 +3,8 @@
 import { useState, useRef } from "react"
 import type { RuntimeConfig } from "@/lib/config-context"
 import { siteConfig } from "@/lib/site-config"
-import { CURSOR_PRESETS, svgToDataUrl } from "@/lib/cursor-presets"
+import { CURSOR_PRESETS, presetPreviewSrc } from "@/lib/cursor-presets"
+import { MUSIC_PRESETS } from "@/lib/music-presets"
 import { buildShareUrl } from "@/lib/share-config"
 
 const CURSOR_SIZE = 32
@@ -32,13 +33,14 @@ function resizeImageForCursor(file: File): Promise<string> {
 }
 
 interface ConfigPanelProps {
-  onStart: (config: RuntimeConfig, cursorPreset: string) => void
+  onStart: (config: RuntimeConfig, cursorPreset: string, musicPreset: string) => void
 }
 
 export function ConfigPanel({ onStart }: ConfigPanelProps) {
   const [header, setHeader] = useState<string>(siteConfig.dedication.header)
   const [bodyText, setBodyText] = useState<string>(siteConfig.dedication.body.join("\n"))
   const [closing, setClosing] = useState<string>(siteConfig.dedication.closing)
+  const [selectedMusic, setSelectedMusic] = useState<string>(MUSIC_PRESETS[0].id)
   const [musicPreview, setMusicPreview] = useState<string | null>(null)
   const [cursorResized, setCursorResized] = useState<string | null>(null)
   const [cursorOriginal, setCursorOriginal] = useState<string | null>(null)
@@ -53,7 +55,14 @@ export function ConfigPanel({ onStart }: ConfigPanelProps) {
     const file = e.target.files?.[0]
     if (!file) return
     setMusicFileName(file.name)
+    setSelectedMusic("custom")
     setMusicPreview(URL.createObjectURL(file))
+  }
+
+  const handleMusicPresetSelect = (id: string) => {
+    setSelectedMusic(id)
+    setMusicFileName("")
+    setMusicPreview(null)
   }
 
   const handleCursorUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,14 +92,22 @@ export function ConfigPanel({ onStart }: ConfigPanelProps) {
     } else if (selectedPreset !== "default") {
       const preset = CURSOR_PRESETS.find((p) => p.id === selectedPreset)
       if (preset) {
-        const dataUrl = svgToDataUrl(preset.svg)
-        cursorImg = dataUrl
-        trailImg = dataUrl
+        const src = presetPreviewSrc(preset)
+        cursorImg = src
+        trailImg = src
       }
     }
 
+    let musicSrc = siteConfig.musicFile
+    if (selectedMusic === "custom" && musicPreview) {
+      musicSrc = musicPreview
+    } else {
+      const mp = MUSIC_PRESETS.find((p) => p.id === selectedMusic)
+      if (mp) musicSrc = mp.file
+    }
+
     const config: RuntimeConfig = {
-      musicFile: musicPreview ?? siteConfig.musicFile,
+      musicFile: musicSrc,
       cursorImage: cursorImg,
       cursorTrailImage: trailImg,
       dedication: {
@@ -99,7 +116,7 @@ export function ConfigPanel({ onStart }: ConfigPanelProps) {
         closing,
       },
     }
-    onStart(config, selectedPreset)
+    onStart(config, selectedPreset, selectedMusic)
   }
 
   const [copied, setCopied] = useState(false)
@@ -115,7 +132,7 @@ export function ConfigPanel({ onStart }: ConfigPanelProps) {
         closing,
       },
     }
-    const url = buildShareUrl(config, selectedPreset)
+    const url = buildShareUrl(config, selectedPreset, selectedMusic)
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
@@ -132,11 +149,31 @@ export function ConfigPanel({ onStart }: ConfigPanelProps) {
           Sube tus archivos y escribe tu dedicatoria
         </p>
 
-        {/* Music upload */}
+        {/* Music selection */}
         <div className="mb-5">
           <label className="block text-yellow-200/80 text-sm font-medium mb-2">
             Musica de fondo
           </label>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {MUSIC_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                onClick={() => handleMusicPresetSelect(preset.id)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-colors ${
+                  selectedMusic === preset.id
+                    ? "border-yellow-400 bg-yellow-400/15"
+                    : "border-yellow-500/20 bg-white/5 hover:bg-white/10"
+                }`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-400 shrink-0">
+                  <path d="M9 18V5l12-2v13" />
+                  <circle cx="6" cy="18" r="3" />
+                  <circle cx="18" cy="16" r="3" />
+                </svg>
+                <span className="text-xs text-yellow-100/70">{preset.label}</span>
+              </button>
+            ))}
+          </div>
           <input
             ref={musicInputRef}
             type="file"
@@ -146,18 +183,22 @@ export function ConfigPanel({ onStart }: ConfigPanelProps) {
           />
           <button
             onClick={() => musicInputRef.current?.click()}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-yellow-500/20 bg-white/5 hover:bg-white/10 transition-colors text-left"
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-colors text-left ${
+              selectedMusic === "custom"
+                ? "border-yellow-400 bg-yellow-400/15"
+                : "border-yellow-500/20 bg-white/5 hover:bg-white/10"
+            }`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-400 shrink-0">
-              <path d="M9 18V5l12-2v13" />
-              <circle cx="6" cy="18" r="3" />
-              <circle cx="18" cy="16" r="3" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-400 shrink-0">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
             </svg>
-            <span className="text-yellow-100/70 text-sm truncate">
-              {musicFileName || "Subir archivo de audio..."}
+            <span className="text-yellow-100/70 text-xs truncate">
+              {musicFileName || "Subir audio personalizado..."}
             </span>
           </button>
-          {musicPreview && (
+          {musicPreview && selectedMusic === "custom" && (
             <audio src={musicPreview} controls className="w-full mt-2 h-8 opacity-70" />
           )}
         </div>
@@ -179,11 +220,11 @@ export function ConfigPanel({ onStart }: ConfigPanelProps) {
                 }`}
               >
                 <div className="w-8 h-8 flex items-center justify-center">
-                  {preset.id === "default" ? (
-                    <img src={siteConfig.cursorImage} alt="" className="w-7 h-7 object-contain" />
-                  ) : (
-                    <img src={svgToDataUrl(preset.svg)} alt="" className="w-7 h-7" />
-                  )}
+                  <img
+                    src={preset.id === "default" ? siteConfig.cursorImage : presetPreviewSrc(preset)}
+                    alt=""
+                    className="w-7 h-7 object-contain"
+                  />
                 </div>
                 <span className="text-[10px] text-yellow-200/60">{preset.label}</span>
               </button>

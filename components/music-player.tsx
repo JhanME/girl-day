@@ -3,11 +3,13 @@
 import { useEffect, useRef, useState } from "react"
 import { useConfig } from "@/lib/config-context"
 
+const DEFAULT_VOLUME = 0.35
+
 export function MusicPlayer() {
   const config = useConfig()
   const audioRef = useRef<HTMLAudioElement>(null)
   const [muted, setMuted] = useState(false)
-  const [volume, setVolume] = useState(0.5)
+  const [volume, setVolume] = useState(DEFAULT_VOLUME)
   const [started, setStarted] = useState(false)
   const [showSlider, setShowSlider] = useState(false)
   const hideTimeout = useRef<ReturnType<typeof setTimeout>>(null)
@@ -16,7 +18,7 @@ export function MusicPlayer() {
     const audio = audioRef.current
     if (!audio) return
 
-    audio.volume = 0.5
+    audio.volume = DEFAULT_VOLUME
     audio.play().then(() => setStarted(true)).catch(() => {
       const handleClick = () => {
         audio.play().then(() => setStarted(true))
@@ -65,24 +67,25 @@ export function MusicPlayer() {
     <>
       <audio ref={audioRef} src={config.musicFile} loop />
       <div
-        className="fixed top-4 left-4 z-[9998] flex flex-col items-center gap-2 pointer-events-auto"
+        className="fixed top-4 left-4 z-[9998] flex items-center gap-0 pointer-events-auto"
         data-no-face-cursor
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
+        {/* Mute/unmute button */}
         <button
           onClick={toggleMute}
-          className="p-4 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors"
+          className="p-3 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors"
           aria-label={muted ? "Activar sonido" : "Silenciar"}
         >
           {muted ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M11 5L6 9H2v6h4l5 4V5z" />
               <line x1="23" y1="9" x2="17" y2="15" />
               <line x1="17" y1="9" x2="23" y2="15" />
             </svg>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M11 5L6 9H2v6h4l5 4V5z" />
               <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
               <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
@@ -90,13 +93,16 @@ export function MusicPlayer() {
           )}
         </button>
 
-        {/* Volume slider — appears on hover */}
+        {/* Volume slider — horizontal, appears to the right on hover */}
         <div
           style={{
             overflow: "hidden",
-            maxHeight: showSlider ? 20 : 0,
+            width: showSlider ? 90 : 0,
             opacity: showSlider ? 1 : 0,
-            transition: "max-height 0.3s ease, opacity 0.3s ease",
+            transition: "width 0.25s ease, opacity 0.25s ease",
+            display: "flex",
+            alignItems: "center",
+            paddingLeft: showSlider ? 8 : 0,
           }}
         >
           <input

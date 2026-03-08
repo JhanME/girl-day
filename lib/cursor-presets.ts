@@ -1,8 +1,21 @@
-export const CURSOR_PRESETS: { id: string; label: string; svg: string }[] = [
+export interface CursorPreset {
+  id: string
+  label: string
+  svg: string
+  image?: string
+}
+
+export const CURSOR_PRESETS: CursorPreset[] = [
   {
     id: "default",
     label: "Original",
     svg: "",
+  },
+  {
+    id: "cabeza3",
+    label: "Cara 2",
+    svg: "",
+    image: "/cabeza3.png",
   },
   {
     id: "heart",
@@ -40,11 +53,51 @@ export function svgToDataUrl(svg: string): string {
   return "data:image/svg+xml," + encodeURIComponent(svg)
 }
 
+/** Get the preview image src for a preset (used in the config panel) */
+export function presetPreviewSrc(preset: CursorPreset): string {
+  if (preset.image) return preset.image
+  if (preset.svg) return svgToDataUrl(preset.svg)
+  return ""
+}
+
+const CURSOR_SIZE = 32
+
+function resizeImageToDataUrl(src: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.crossOrigin = "anonymous"
+    img.onload = () => {
+      const canvas = document.createElement("canvas")
+      canvas.width = CURSOR_SIZE
+      canvas.height = CURSOR_SIZE
+      const ctx = canvas.getContext("2d")!
+      const scale = Math.min(CURSOR_SIZE / img.width, CURSOR_SIZE / img.height)
+      const w = img.width * scale
+      const h = img.height * scale
+      const x = (CURSOR_SIZE - w) / 2
+      const y = (CURSOR_SIZE - h) / 2
+      ctx.clearRect(0, 0, CURSOR_SIZE, CURSOR_SIZE)
+      ctx.drawImage(img, x, y, w, h)
+      resolve(canvas.toDataURL("image/png"))
+    }
+    img.onerror = reject
+    img.src = src
+  })
+}
+
 /** Resolve a preset id to cursor + trail image URLs */
-export function resolvePresetCursor(presetId: string): { cursorImage: string; cursorTrailImage: string } | null {
+export async function resolvePresetCursor(presetId: string): Promise<{ cursorImage: string; cursorTrailImage: string } | null> {
   if (presetId === "default") return null
   const preset = CURSOR_PRESETS.find((p) => p.id === presetId)
-  if (!preset || !preset.svg) return null
-  const dataUrl = svgToDataUrl(preset.svg)
-  return { cursorImage: dataUrl, cursorTrailImage: dataUrl }
+  if (!preset) return null
+
+  if (preset.image) {
+    const resized = await resizeImageToDataUrl(preset.image)
+    return { cursorImage: resized, cursorTrailImage: preset.image }
+  }
+  if (preset.svg) {
+    const dataUrl = svgToDataUrl(preset.svg)
+    return { cursorImage: dataUrl, cursorTrailImage: dataUrl }
+  }
+  return null
 }

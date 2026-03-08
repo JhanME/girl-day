@@ -50,11 +50,27 @@ function Scene() {
       <FloatingLeaf delay={5} startX={8} startY={42} />
       <FloatingLeaf delay={7.5} startX={78} startY={32} />
 
-      {/* Sunflowers */}
+      {/* Sunflowers — core trio (all screens) */}
       <div className="absolute bottom-0 left-0 right-0 flex items-end justify-center gap-40">
         <Sunflower size="medium" stemHeight={120} offsetX={-48} delay={0.2} rotation={-8} />
         <Sunflower size="large"  stemHeight={150} offsetX={0}   delay={0}   rotation={0}  />
         <Sunflower size="medium" stemHeight={110} offsetX={48}  delay={0.5} rotation={8}  />
+      </div>
+
+      {/* Extra flowers — large screens only */}
+      <div className="hidden lg:block absolute bottom-0 left-0 right-0">
+        <Sunflower size="small"  stemHeight={90}  offsetX={-260} delay={0.8} rotation={-12} />
+        <Sunflower size="medium" stemHeight={130} offsetX={-180} delay={0.4} rotation={-5}  />
+        <Sunflower size="medium" stemHeight={125} offsetX={180}  delay={0.6} rotation={5}   />
+        <Sunflower size="small"  stemHeight={85}  offsetX={260}  delay={1.0} rotation={12}  />
+      </div>
+
+      {/* Extra flowers — extra-large screens */}
+      <div className="hidden xl:block absolute bottom-0 left-0 right-0">
+        <Sunflower size="small"  stemHeight={80}  offsetX={-380} delay={1.2} rotation={-15} />
+        <Sunflower size="medium" stemHeight={105} offsetX={-320} delay={0.7} rotation={-10} />
+        <Sunflower size="medium" stemHeight={100} offsetX={320}  delay={0.9} rotation={10}  />
+        <Sunflower size="small"  stemHeight={75}  offsetX={380}  delay={1.4} rotation={15}  />
       </div>
 
       {/* Bottom fern decoration */}
@@ -89,8 +105,8 @@ function Scene() {
 }
 
 /** Apply cursor preset overrides to a config */
-function applyPreset(config: RuntimeConfig, presetId: string): RuntimeConfig {
-  const resolved = resolvePresetCursor(presetId)
+async function applyPreset(config: RuntimeConfig, presetId: string): Promise<RuntimeConfig> {
+  const resolved = await resolvePresetCursor(presetId)
   if (!resolved) return config
   return { ...config, cursorImage: resolved.cursorImage, cursorTrailImage: resolved.cursorTrailImage }
 }
@@ -103,9 +119,13 @@ export default function Home() {
   useEffect(() => {
     const shared = decodeConfigFromUrl()
     if (shared) {
-      setConfig(applyPreset(shared.config, shared.cursorPreset))
+      applyPreset(shared.config, shared.cursorPreset).then((cfg) => {
+        setConfig(cfg)
+        setChecked(true)
+      })
+    } else {
+      setChecked(true)
     }
-    setChecked(true)
   }, [])
 
   // Don't render anything until we've checked the URL
@@ -114,7 +134,9 @@ export default function Home() {
   if (!config) {
     return (
       <ConfigPanel
-        onStart={(cfg, cursorPreset) => setConfig(applyPreset(cfg, cursorPreset))}
+        onStart={(cfg, cursorPreset, _musicPreset) => {
+          applyPreset(cfg, cursorPreset).then(setConfig)
+        }}
       />
     )
   }

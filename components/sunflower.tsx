@@ -23,7 +23,7 @@ export function Sunflower({ size, stemHeight, offsetX, delay }: SunflowerProps) 
         left: `calc(50% + ${offsetX}px)`,
         transform: "translateX(-50%)",
         transformOrigin: "center bottom",
-        animation: `flower-sway ${3.4 + delay * 0.3}s ease-in-out ${delay}s infinite, flower-breathe ${2.8 + delay * 0.2}s ease-in-out ${delay}s infinite`,
+        animation: `flower-sway ${3.4 + delay * 0.3}s ease-in-out ${-delay}s infinite, flower-breathe ${2.8 + delay * 0.2}s ease-in-out ${-delay}s infinite`,
       }}
     >
       {/* Flower head */}
@@ -33,7 +33,7 @@ export function Sunflower({ size, stemHeight, offsetX, delay }: SunflowerProps) 
           height: flowerSize,
           position: "relative",
           filter: "drop-shadow(0 0 18px rgba(255, 200, 50, 0.65))",
-          animation: `flower-bob ${3.4 + delay * 0.3}s ease-in-out ${delay + 0.1}s infinite`,
+          animation: `flower-bob ${3.4 + delay * 0.3}s ease-in-out ${-(delay + 0.1)}s infinite`,
         }}
       >
         <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full">
@@ -139,7 +139,7 @@ export function Sunflower({ size, stemHeight, offsetX, delay }: SunflowerProps) 
         <g
           style={{
             transformOrigin: `${stemW * 2}px ${shorterStemHeight * 0.2}px`,
-            animation: `leaf-wave ${3.8 + delay * 0.4}s ease-in-out ${delay + 0.2}s infinite`,
+            animation: `leaf-wave ${3.8 + delay * 0.4}s ease-in-out ${-(delay + 0.2)}s infinite`,
           }}
         >
           <path
@@ -158,7 +158,7 @@ export function Sunflower({ size, stemHeight, offsetX, delay }: SunflowerProps) 
         <g
           style={{
             transformOrigin: `${stemW * 2}px ${shorterStemHeight * 0.25}px`,
-            animation: `leaf-wave ${3.4 + delay * 0.3}s ease-in-out ${delay + 0.35}s infinite`,
+            animation: `leaf-wave ${3.4 + delay * 0.3}s ease-in-out ${-(delay + 0.35)}s infinite`,
           }}
         >
           <path
@@ -177,7 +177,7 @@ export function Sunflower({ size, stemHeight, offsetX, delay }: SunflowerProps) 
         <g
           style={{
             transformOrigin: `${stemW * 2}px ${shorterStemHeight * 0.42}px`,
-            animation: `leaf-wave ${3.6 + delay * 0.35}s ease-in-out ${delay + 0.15}s infinite`,
+            animation: `leaf-wave ${3.6 + delay * 0.35}s ease-in-out ${-(delay + 0.15)}s infinite`,
           }}
         >
           <path
@@ -196,7 +196,7 @@ export function Sunflower({ size, stemHeight, offsetX, delay }: SunflowerProps) 
         <g
           style={{
             transformOrigin: `${stemW * 2}px ${shorterStemHeight * 0.48}px`,
-            animation: `leaf-wave ${3.2 + delay * 0.3}s ease-in-out ${delay + 0.5}s infinite`,
+            animation: `leaf-wave ${3.2 + delay * 0.3}s ease-in-out ${-(delay + 0.5)}s infinite`,
           }}
         >
           <path
@@ -215,7 +215,7 @@ export function Sunflower({ size, stemHeight, offsetX, delay }: SunflowerProps) 
         <g
           style={{
             transformOrigin: `${stemW * 2}px ${shorterStemHeight * 0.65}px`,
-            animation: `leaf-wave ${3.9 + delay * 0.4}s ease-in-out ${delay + 0.25}s infinite`,
+            animation: `leaf-wave ${3.9 + delay * 0.4}s ease-in-out ${-(delay + 0.25)}s infinite`,
           }}
         >
           <path
@@ -234,7 +234,7 @@ export function Sunflower({ size, stemHeight, offsetX, delay }: SunflowerProps) 
         <g
           style={{
             transformOrigin: `${stemW * 2}px ${shorterStemHeight * 0.72}px`,
-            animation: `leaf-wave ${3.3 + delay * 0.32}s ease-in-out ${delay + 0.4}s infinite`,
+            animation: `leaf-wave ${3.3 + delay * 0.32}s ease-in-out ${-(delay + 0.4)}s infinite`,
           }}
         >
           <path

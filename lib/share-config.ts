@@ -1,28 +1,27 @@
 import { siteConfig } from "./site-config"
+import { resolveMusicPreset } from "./music-presets"
 import type { RuntimeConfig } from "./config-context"
 
-/**
- * Shareable payload — only text + cursor preset go in the URL.
- * Music and custom uploaded images can't be shared via URL.
- */
 interface SharePayload {
   h: string   // header
   b: string[] // body lines
   c: string   // closing
-  p: string   // cursor preset id ("default" | "heart" | "flower" | etc.)
+  p: string   // cursor preset id
+  m: string   // music preset id
 }
 
-export function encodeConfig(config: RuntimeConfig, cursorPreset: string): string {
+export function encodeConfig(config: RuntimeConfig, cursorPreset: string, musicPreset: string): string {
   const payload: SharePayload = {
     h: config.dedication.header,
     b: config.dedication.body,
     c: config.dedication.closing,
     p: cursorPreset,
+    m: musicPreset,
   }
   return btoa(encodeURIComponent(JSON.stringify(payload)))
 }
 
-export function decodeConfigFromUrl(): { config: RuntimeConfig; cursorPreset: string } | null {
+export function decodeConfigFromUrl(): { config: RuntimeConfig; cursorPreset: string; musicPreset: string } | null {
   if (typeof window === "undefined") return null
 
   const params = new URLSearchParams(window.location.search)
@@ -32,10 +31,14 @@ export function decodeConfigFromUrl(): { config: RuntimeConfig; cursorPreset: st
   try {
     const payload: SharePayload = JSON.parse(decodeURIComponent(atob(encoded)))
 
+    const musicPreset = payload.m || "katt_chata"
+    const musicFile = resolveMusicPreset(musicPreset) ?? siteConfig.musicFile
+
     return {
       cursorPreset: payload.p || "default",
+      musicPreset,
       config: {
-        musicFile: siteConfig.musicFile,
+        musicFile,
         cursorImage: siteConfig.cursorImage,
         cursorTrailImage: siteConfig.cursorImage,
         dedication: {
@@ -50,9 +53,9 @@ export function decodeConfigFromUrl(): { config: RuntimeConfig; cursorPreset: st
   }
 }
 
-export function buildShareUrl(config: RuntimeConfig, cursorPreset: string): string {
+export function buildShareUrl(config: RuntimeConfig, cursorPreset: string, musicPreset: string): string {
   const base = typeof window !== "undefined"
     ? window.location.origin + window.location.pathname
     : ""
-  return `${base}?d=${encodeConfig(config, cursorPreset)}`
+  return `${base}?d=${encodeConfig(config, cursorPreset, musicPreset)}`
 }
