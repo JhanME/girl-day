@@ -1,5 +1,5 @@
 export const siteConfig = {
-  musicFile: "/katt_chata.mp3",
+  musicFile: "/music/katt_chata.mp3",
   cursorImage: "/cabeza2-cursor.png",
   dedication: {
     header: "8 de Marzo",
