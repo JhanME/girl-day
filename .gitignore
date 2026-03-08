@@ -27,4 +27,7 @@ yarn-error.log*
 next-env.d.ts
 
 # npm lockfile (project uses pnpm)
-package-lock.json
+package-lock.jsonS
+
+#
+CLAUDE.md 
